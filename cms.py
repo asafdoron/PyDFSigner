@@ -11,10 +11,7 @@ import hashlib
 #from Crypto import Random
 from tlslite.api import *
 import array
-try:
-    from cStringIO import StringIO
-except ImportError:
-    from StringIO import StringIO
+from io import BytesIO
 
 from x509Generator import x509Generator
 from x509Parser import x509Parser
@@ -118,7 +115,7 @@ class CMS(object):
         data = array.array('B', self.digest)
         signature_bytes = self.rsakey.hashAndSign(data)
 
-        strsig = array.array.tostring(signature_bytes);
+        strsig = signature_bytes.tobytes();
         encryptedDigest = univ.OctetString(strsig)
 
         signerInfo.setComponentByName('encryptedDigest', encryptedDigest)
@@ -136,5 +133,5 @@ class CMS(object):
         # encode ASN.1 PKCS7
         strp7 = pyasn1.codec.der.encoder.encode(p7)
 
-        return strp7.encode('hex')
+        return strp7.hex()
 

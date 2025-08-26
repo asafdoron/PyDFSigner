@@ -139,7 +139,7 @@ def readPemFromFile(fileObj):
         if state == stDump:
             substrate = ''
             for certLine in certLines:
-                substrate = substrate + base64.decodestring(certLine)
+                substrate = substrate + base64.decodebytes(certLine.encode())
             return substrate
 
 # Read ASN.1/PEM X.509 certificates on stdin, parse each into plain text,
@@ -148,9 +148,9 @@ if __name__ == '__main__':
     import sys
 
     if len(sys.argv) != 1:
-        print """Usage:
+        print("""Usage:
 $ cat CACertificate.pem | %s
-$ cat userCertificate.pem | %s""" % (sys.argv[0], sys.argv[0])
+$ cat userCertificate.pem | %s""" % (sys.argv[0], sys.argv[0]))
         sys.exit(-1)
 
     certType = Certificate()
@@ -163,10 +163,10 @@ $ cat userCertificate.pem | %s""" % (sys.argv[0], sys.argv[0])
             break
 
         cert = decoder.decode(substrate, asn1Spec=certType)[0]
-        print cert.prettyPrint()
+        print(cert.prettyPrint())
 
         assert encoder.encode(cert) == substrate, 'cert recode fails'
 
         certCnt = certCnt + 1
 
-    print '*** %s PEM cert(s) de/serialized' % certCnt
+    print('*** %s PEM cert(s) de/serialized' % certCnt)

@@ -4,11 +4,11 @@
 
 #from random import randint
 from datetime import datetime,timedelta
-from pyPdf import PdfFileWriter, PdfFileReader
-from pyPdf.generic import *
+from PyPDF2 import PdfFileWriter, PdfFileReader
+from PyPDF2.generic import *
 import hashlib
 from cms import *
-from StringIO import StringIO
+from io import BytesIO
     
 import logging
 #logging.basicConfig(level=logging.DEBUG)
@@ -18,7 +18,7 @@ class PdfSigner(object):
         self._pdfStream = pdfStream
         self._x509PemStream = x509PemStream
         self._rsaPvkPemStream = rsaPvkPemStream
-        self._outputpdf = StringIO()
+        self._outputpdf = BytesIO()
         self._newobjectscount = 0
         self._startxref = 0
         self._xref_location = 0
@@ -46,9 +46,9 @@ class PdfSigner(object):
 
     def _isSigned(self):
         _bIsSigned = False
-        if self._catalog.has_key("/AcroForm"):
+        if "/AcroForm" in self._catalog:
             acroform = self._catalog["/AcroForm"]
-            if acroform.has_key("/SigFlags"):
+            if "/SigFlags" in acroform:
                 n = acroform["/SigFlags"]
                 if n == 3:
                     _bIsSigned = True
@@ -89,7 +89,7 @@ class PdfSigner(object):
         pageIndirect = kids[nPageNumber]
         self._PageParentRef = pageIndirect.idnum
 
-        if page.has_key("/Annots"):
+        if "/Annots" in page:
             annots = page["/Annots"]
             annots.append(IndirectObject(self._SigObjIdnum, 0, self))
         else:
@@ -102,7 +102,7 @@ class PdfSigner(object):
 
     def _addAcroFormRef(self):
         # found AcroForm
-        if self._catalog.has_key("/AcroForm"):
+        if "/AcroForm" in self._catalog:
             acroform = self._catalog["/AcroForm"]
             acroform[NameObject("/SigFlags")] = NumberObject(3)
             acrofields = acroform["/Fields"]
@@ -233,7 +233,7 @@ class PdfSigner(object):
         self._xref_location = stream.tell()
         stream.write("xref\n")
 
-        keyfirst = self._xrefcount.keys()[0]
+        keyfirst = list(self._xrefcount.keys())[0]
         val = self._xrefcount[keyfirst]
 
         if keyfirst == 1:
@@ -243,7 +243,7 @@ class PdfSigner(object):
 
         stream.write("%010d %05d f \n" % (0, 65535))
 
-        for key in sorted(self._xrefcount.iterkeys()):
+        for key in sorted(self._xrefcount.keys()):
             val = self._xrefcount[key]
 
             if key != 1:
@@ -274,7 +274,7 @@ class PdfSigner(object):
         nxref = 1
         idx = 0
         # write the new objects
-        for key in sorted(self._newobjects_collections.iterkeys()):
+        for key in sorted(self._newobjects_collections.keys()):
             #...do whatever with dict[key]...
             objdict = self._newobjects_collections[key]
             self._newxref[key] = stream.tell()
@@ -362,7 +362,7 @@ class PdfSigner(object):
     def _calcSha1(self,block_size):
         logging.debug("calc_sha1")
 
-        stream = StringIO()
+        stream = BytesIO()
         stream1 = self._outputpdf
         stream1.seek(0,0)
         stream.write(stream1.read(self._ByteRange1))

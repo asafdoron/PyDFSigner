@@ -16,76 +16,64 @@ from pdfSigner import *
 
 from tlslite.api import *
 
-try:
-    from cStringIO import StringIO
-except ImportError:
-    from StringIO import StringIO
+from io import BytesIO
 
 def testPDFSigner():
-    stream = StringIO()
-    f = file('d:\\2.pdf','rb')
-    stream.write(f.read())
-    f.close()
-    x509stream = StringIO()
-    f = file('d:\\rsax509Cert.cer','rb')
-    x509stream.write(f.read())
-    f.close()
-    rsastream = StringIO()
-    f = file('d:\\rsax509key.pem','rb')
-    rsastream.write(f.read())
-    f.close()
+    stream = BytesIO()
+    with open('d:\\2.pdf','rb') as f:
+        stream.write(f.read())
+    x509stream = BytesIO()
+    with open('d:\\rsax509Cert.cer','rb') as f:
+        x509stream.write(f.read())
+    rsastream = BytesIO()
+    with open('d:\\rsax509key.pem','rb') as f:
+        rsastream.write(f.read())
     signer = PdfSigner(stream,x509stream,rsastream)
     stream = signer.Sign()
-    f = file('d:\\2_sign.pdf', "wb")
-    f.write(stream.getvalue())
-    f.close()
+    with open('d:\\2_sign.pdf', "wb") as f:
+        f.write(stream.getvalue())
     stream.close()
 
 def testCMS():
     p7 = cms()
-    data = '385DC6AA523D22E5F9558001EBAFCBAEFC842FB8'.decode('hex')
+    data = bytes.fromhex('385DC6AA523D22E5F9558001EBAFCBAEFC842FB8')
 ##    m = hashlib.sha1()
 ##    m.update(data)
 ##    #h = m.hexdigest()
 ##    h = m.digest()
 ##    p7.createPKCS7(h)
 
-    x509stream = StringIO()
-    f = file('d:\\rsax509Cert.cer','rb')
-    x509stream.write(f.read())
-    f.close()
-    rsastream = StringIO()
-    f = file('d:\\rsax509key.pem','rb')
-    rsastream.write(f.read())
-    f.close()
+    x509stream = BytesIO()
+    with open('d:\\rsax509Cert.cer','rb') as f:
+        x509stream.write(f.read())
+    rsastream = BytesIO()
+    with open('d:\\rsax509key.pem','rb') as f:
+        rsastream.write(f.read())
     p7.createPKCS7(data,x509stream,rsastream)
 
 def testx509Generator():
     x509gen = x509Generator()
     x509gen.generate('asaf','asaf.doron@gmail.com')
     
-    s = StringIO()
+    s = BytesIO()
     s = x509gen.writeRSAPrivateKeyPEM(s)
     
-    f = file('d:\\rsax509key.pem', "w")
-    f.write(s.getvalue())
-    f.close()
+    with open('d:\\rsax509key.pem', "w") as f:
+        f.write(s.getvalue())
     s.close()
     
-    s = StringIO()
+    s = BytesIO()
     s = x509gen.writeX509PEM(s)
-    f = file('d:\\rsax509Cert.cer', "w")
-    f.write(s.getvalue())
-    f.close()
+    with open('d:\\rsax509Cert.cer', "w") as f:
+        f.write(s.getvalue())
     s.close()
 
 
 
 def testRSAPrvKeyParser():
-    stream = StringIO()
-    f = file('D:\\downloads\\Python\\pdfSigner\\rsax509key.pem','r')
-    stream.write(f.read())
-    f.close()
+    stream = BytesIO()
+    with open('D:\\downloads\\Python\\pdfSigner\\rsax509key.pem','r') as f:
+        stream.write(f.read())
     stream.seek(0,0)
     s = ''
     for line in stream:

@@ -4,10 +4,7 @@
 
 
 import string, base64
-try:
-    from cStringIO import StringIO
-except ImportError:
-    from StringIO import StringIO
+from io import BytesIO
 
 from x509 import *
 
@@ -41,7 +38,7 @@ class x509Parser(object):
             if state == stDump:
                 substrate = ''
                 for certLine in certLines:
-                    substrate = substrate + base64.decodestring(certLine)
+                    substrate = substrate + base64.decodebytes(certLine.encode())
                 return substrate
 
     def Parse(self):

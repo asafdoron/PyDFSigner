@@ -9,10 +9,7 @@ from pyasn1.type import tag,namedtype,namedval,univ,constraint,char,useful
 import hashlib
 from tlslite.api import *
 import array
-try:
-    from cStringIO import StringIO
-except ImportError:
-    from StringIO import StringIO
+from io import BytesIO
 
 from x509 import *
 
@@ -48,9 +45,9 @@ class x509Generator(object):
         if n == 0 or n == 1:
             return str(n)
         elif n % 2 == 0:
-            return self.IntToBin(n/2) + "0"
+            return self.IntToBin(n//2) + "0"
         else:
-            return self.IntToBin(n/2) + "1"
+            return self.IntToBin(n//2) + "1"
 
 
     def generate(self, sCN, sEmail):
@@ -123,7 +120,7 @@ class x509Generator(object):
         pkinfo.setComponentByPosition(1, univ.Integer(self.rsakey.e))
 
         # Encode the public key info as a bit string
-        pklong = long(pyasn1.codec.der.encoder.encode(pkinfo).encode('hex'), 16)
+        pklong = int(pyasn1.codec.der.encoder.encode(pkinfo).hex(), 16)
         pkbitstring = univ.BitString("'00%s'B" % self.toBitString_(pklong))
 
         #SubjectPublicKeyInfo structure
@@ -155,7 +152,7 @@ class x509Generator(object):
         logging.debug("calc x509 hash")
          # Encode the tbsCertificate sequence into ASN.1
         signature_bytes = self.rsakey.hashAndSign(pyasn1.codec.der.encoder.encode(tbsCertificate))
-        strsig = array.array.tostring(signature_bytes);
+        strsig = signature_bytes.tobytes();
         sigbitstring = univ.BitString("'%s'B" % self.BytesToBin(strsig))
 
         self.x509.setComponentByName('tbsCertificate', tbsCertificate)

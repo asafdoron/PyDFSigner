@@ -251,6 +251,6 @@ if __name__ == '__main__':
                     asn1Spec=asn1Spec()
                     )
 
-                print 'S/MIME part ', part.get_content_type(), ', type ', part.get_param('smime-type')
-                print t.prettyPrint()
+                print('S/MIME part ', part.get_content_type(), ', type ', part.get_param('smime-type'))
+                print(t.prettyPrint())
 
