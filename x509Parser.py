@@ -20,11 +20,11 @@ class x509Parser(object):
     def readPemFromFile(self):
         state = stSpam
         self.x509PemStream.seek(0,0)
-        while 1:
+        while True:
             certLine = self.x509PemStream.readline()
             if not certLine:
                 break
-            certLine = string.strip(certLine)
+            certLine = certLine.strip()
             if state == stSpam:
                 if certLine == '-----BEGIN CERTIFICATE-----':
                     certLines = []

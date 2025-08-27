@@ -4,8 +4,8 @@
 
 #from random import randint
 from datetime import datetime,timedelta
-from PyPDF2 import PdfFileWriter, PdfFileReader
-from PyPDF2.generic import *
+from pypdf import PdfWriter, PdfReader
+from pypdf.generic import *
 import hashlib
 from cms import *
 from io import BytesIO
@@ -57,22 +57,22 @@ class PdfSigner(object):
 
 
     def _rebuildPDF(self):
-        self._reader = PdfFileReader(self._pdfStream)
+        self._reader = PdfReader(self._pdfStream)
         self._trailer = self._reader.trailer
         self._catalog = self._trailer["/Root"]
         
         _bIsSigned = self._isSigned()
 
         if not _bIsSigned:
-            output = PdfFileWriter()
+            output = PdfWriter()
             for page in self._reader.pages:
-                output.addPage(page)
+                output.add_page(page)
             output.write(self._outputpdf)
         else:
             self._reader.stream.seek(0,0)
             self._outputpdf.write(self._reader.stream.read())
 
-        self._reader = PdfFileReader(self._outputpdf)
+        self._reader = PdfReader(self._outputpdf)
         self._trailer = self._reader.trailer
         self._catalog = self._trailer["/Root"]
         self._objectscount = self._trailer["/Size"]
@@ -83,7 +83,7 @@ class PdfSigner(object):
         logging.debug("AddPageAnnots")
 
         # Get Page Parent
-        page = self._reader.getPage(nPageNumber)
+        page = self._reader.pages[nPageNumber]
         pageparent = page["/Parent"]
         kids = pageparent["/Kids"]
         pageIndirect = kids[nPageNumber]

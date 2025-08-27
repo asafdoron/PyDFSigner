@@ -121,11 +121,11 @@ stSpam, stHam, stDump = 0, 1, 2
 
 def readPemFromFile(fileObj):
     state = stSpam
-    while 1:
+    while True:
         certLine = fileObj.readline()
         if not certLine:
             break
-        certLine = string.strip(certLine)
+        certLine = certLine.strip()
         if state == stSpam:
             if certLine == '-----BEGIN CERTIFICATE-----':
                 certLines = []
@@ -157,7 +157,7 @@ $ cat userCertificate.pem | %s""" % (sys.argv[0], sys.argv[0]))
 
     certCnt = 0
 
-    while 1:
+    while True:
         substrate = readPemFromFile(sys.stdin)
         if not substrate:
             break
